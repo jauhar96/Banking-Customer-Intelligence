@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: bci_postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: bci_mlflow
+    restart: unless-stopped
+    ports:
+      - "${MLFLOW_PORT}:5000"
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    volumes:
+      - mlflowdata:/mlflow
+
+volumes:
+  pgdata:
+  mlflowdata:
